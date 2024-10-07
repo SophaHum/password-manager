@@ -24,6 +24,8 @@ pnpm dev
 # or
 bun dev
 ```
+Get Nextaut_url from this
+(https://auth-secret-gen.vercel.app/)
 
 You can check out [the Next.js GitHub repository](https://github.com/SophaHum/password-manager) - your feedback and contributions are welcome!
 
