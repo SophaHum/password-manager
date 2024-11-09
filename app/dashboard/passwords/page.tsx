@@ -1,111 +1,86 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useEffect, useState, useCallback } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { PasswordsTable } from "../components/PasswordsTable"
+import { AddPasswordDialog } from "../components/AddPasswordDialog"
+import { Password } from "@/types/password"
 
 export default function PasswordsPage() {
-  const [passwords, setPasswords] = useState([])
-  const [title, setTitle] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [url, setUrl] = useState('')
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [passwords, setPasswords] = useState<Password[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    fetchPasswords()
+  const fetchPasswords = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/passwords', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          error: 'Failed to fetch passwords'
+        }))
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      console.log('Fetched passwords:', data) // Debug log
+      
+      if (Array.isArray(data)) {
+        setPasswords(data)
+      } else {
+        console.error('Invalid data format:', data)
+        throw new Error('Invalid data format received')
+      }
+    } catch (error) {
+      console.error('Error fetching passwords:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
-  const fetchPasswords = async () => {
-    const response = await fetch('/api/passwords')
-    if (response.ok) {
-      const data = await response.json()
-      setPasswords(data)
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
     }
-  }
+  }, [status, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const response = await fetch('/api/passwords', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, username, password, url }),
-    })
-    if (response.ok) {
-      setTitle('')
-      setUsername('')
-      setPassword('')
-      setUrl('')
+  useEffect(() => {
+    if (session) {
       fetchPasswords()
     }
+  }, [session, fetchPasswords])
+
+  if (status === 'loading') {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Add New Password</CardTitle>
-          <CardDescription>Save a new password to your vault</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="title">Title</Label>
-                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="username">Username</Label>
-                <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="url">URL</Label>
-                <Input id="url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} />
-              </div>
-            </div>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" onClick={handleSubmit}>Save Password</Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Passwords</CardTitle>
-          <CardDescription>Manage your saved passwords</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>URL</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {passwords.map((pwd: Record<string, string>) => (
-                <TableRow key={pwd.id}>
-                  <TableCell>{pwd.title}</TableCell>
-                  <TableCell>{pwd.username}</TableCell>
-                  <TableCell>{pwd.url}</TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm">View</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+    <div className="container py-6">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Your Passwords</h1>
+        <AddPasswordDialog />
+      </div>
+      <PasswordsTable 
+        passwords={passwords}
+        isLoading={isLoading}
+        onPasswordUpdated={fetchPasswords}
+      />
     </div>
   )
 }

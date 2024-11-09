@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Password Manager
+
+A secure, modern password manager built with Next.js, featuring user authentication, encrypted password storage, and an intuitive dashboard interface.
+
+## Preview
+
+<div align="center">
+  <img src="./app/public/screenshots/dashboard.png" alt="Dashboard Preview" width="600"/>
+  <p><em>Dashboard View</em></p>
+</div>
+
+<div align="center">
+  <img src="./app/public/screenshots/login.png" alt="Login Preview" width="600"/>
+  <p><em>Login Page</em></p>
+</div>
+
+<div align="center">
+  <img src="./app/public/screenshots/register.png" alt="Register Preview" width="600"/>
+  <p><em>Register Page</em></p>
+</div>
+
+## Features
+
+- 🔐 Secure user authentication with NextAuth.js
+- 🗄️ Encrypted password storage using PostgreSQL
+- 📱 Responsive dashboard interface
+- 🎨 Modern UI with Tailwind CSS
+- 🔄 Real-time password management
+- 🔍 Search and filter capabilities
+
+## Tech Stack
+
+- [Next.js 14](https://nextjs.org/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Prisma](https://www.prisma.io/)
+- [NextAuth.js](https://next-auth.js.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+
+## Prerequisites
+
+- Node.js 18+ 
+- PostgreSQL database
+- npm or yarn
 
 ## Getting Started
 
-First, run the development server:
-
+1. Clone the repository:
 ```bash
-# Create a .env file with the following content
-NEXTAUTH_URL=XXX
-DATABASE_URL="postgresql://johndoe:randompassword@localhost:5432/mydb?schema=public"
+git clone https://github.com/YourUsername/password-manager.git
+cd password-manager
+```
+
+2. Install dependencies:
+```bash
 npm install
 # or
-yar install
-# or
-pnpm install
-# or
-bun install
-# next
+yarn install
+```
+
+3. Set up your environment variables:
+Create a `.env` file in the root directory with the following:
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/password_manager?schema=public"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key" # Generate at https://auth-secret-gen.vercel.app/
+```
+
+4. Set up the database:
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+5. Run the development server:
+```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-Get Nextaut_url from this
-(https://auth-secret-gen.vercel.app/)
 
-You can check out [the Next.js GitHub repository](https://github.com/SophaHum/password-manager) - your feedback and contributions are welcome!
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+password-manager/
+├── app/
+│   ├── api/           # API routes
+│   ├── dashboard/     # Dashboard pages
+│   ├── login/         # Authentication pages
+│   └── types/         # TypeScript definitions
+├── components/        # Reusable UI components
+├── lib/              # Utility functions
+├── prisma/           # Database schema
+└── public/           # Static assets
+    └── screenshots/  # Application screenshots
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Deployment
+
+The easiest way to deploy this app is to use the [Vercel Platform](https://vercel.com/new).
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YourUsername/password-manager)
+
+## Support
+
+If you find this project helpful, please give it a ⭐️ on GitHub!
